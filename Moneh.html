@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moneh - Smart Wallet</title>
+    <style>
+        /* --- PREMIUM GREEN & WHITE PALETTE --- */
+        :root {
+            --bg-main: #F4F7F5;
+            --card-bg: #FFFFFF;
+            --primary: #10B981; 
+            --primary-dark: #059669;
+            --text-dark: #1F2937;
+            --text-muted: #6B7280;
+            --danger: #EF4444;
+            --border: #E5E7EB;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navigation Header bar */
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            padding: 10px 18px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            color: var(--primary);
+            background-color: #E6F4EA;
+        }
+
+        .nav-btn.active {
+            color: #FFFFFF;
+            background-color: var(--primary);
+        }
+
+        /* Main Screen Pages Layout */
+        main {
+            max-width: 850px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 0 20px;
+            flex-grow: 1;
+        }
+
+        .page {
+            display: none; 
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .page.active {
+            display: block; 
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Overview Visual Blocks */
+        .summary-box {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .summary-box { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        #total-balance { color: var(--primary-dark); }
+        #total-income { color: var(--primary); }
+        #total-spending { color: var(--danger); }
+
+        /* General Forms & Data Boxes Styling */
+        .box {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .box h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            border-bottom: 2px solid #E6F4EA;
+            padding-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 15px;
+            background-color: #FAFAFA;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            background-color: #FFFFFF;
+        }
+
+        button.btn-action {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        button.btn-action:hover {
+            background-color: var(--primary-dark);
+        }
+
+        button:disabled {
+            background-color: #A7F3D0 !important;
+            cursor: not-allowed;
+        }
+
+        /* Transaction Log View styling lines */
+        ul.history-list {
+            list-style: none;
+        }
+
+        ul.history-list li {
+            padding: 15px 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        ul.history-list li:last-child {
+            border-bottom: none;
+        }
+
+        .tx-desc { font-weight: 500; font-size: 16px; }
+        .tx-inc { color: var(--primary); font-weight: 700; }
+        .tx-spd { color: var(--danger); font-weight: 700; }
+
+        /* Tips Page Layout Rules */
+        .tips-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tip-card {
+            background: var(--card-bg);
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .tip-card h3 {
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .tip-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .status-msg {
+            font-size: 14px;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- VISUAL INTERFACE BAR -->
+    <header>
+        <div class="logo">🌿 Moneh</div>
+        <div class="nav-links">
+            <button id="tab-dashboard" class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+            <button id="tab-log" class="nav-btn" onclick="showPage('log')">Log Entry</button>
+            <button id="tab-history" class="nav-btn" onclick="showPage('history')">History</button>
+            <button id="tab-tips" class="nav-btn" onclick="showPage('tips')">Saving Tips</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- PAGE 1: DASHBOARD -->
+        <div id="page-dashboard" class="page active">
+            <div class="summary-box">
+                <div class="card">
+                    <h3>My Live Balance</h3>
+                    <p id="total-balance">$0.00</p>
+                </div>
+                <div class="card">
+                    <h3>Total Inflow</h3>
+                    <p id="total-income">$0.00</p>
+                </div>
+                <div class="card">
+                    <h3>Total Spending</h3>
+                    <p id="total-spending">$0.00</p>
+                </div>
+            </div>
+
+            <!-- Manual Balance Configuration Box -->
+            <div class="box">
+                <h2>Set Base Capital</h2>
+                <label>Type your manual initial balance ($)</label>
+                <input type="number" id="base-balance-input" placeholder="Enter starting balance e.g., 10000" step="0.01">
+                <button class="btn-action" onclick="saveManualBase()">Update Starting Balance</button>
+            </div>
+        </div>
+
+        <!-- PAGE 2: LOG TRANSACTION FORM -->
+        <div id="page-log" class="page">
+            <div class="box">
+                <h2>Record New Transaction</h2>
+                <form id="money-form">
+                    <label>Description</label>
+                    <input type="text" id="form-desc" placeholder="e.g., Target groceries, Freelance work" required>
+
+                    <label>Amount ($)</label>
+                    <input type="number" id="form-amount" placeholder="0.00" step="0.01" required>
+
+                    <label>Flow Action</label>
+                    <select id="form-type">
+                        <option value="spending">Spending / Outflow (-)</option>
+                        <option value="income">Income / Inflow (+)</option>
+                    </select>
+
+                    <button type="submit" id="btn-submit" class="btn-action">Sync to Cloud Sheets</button>
+                    <div id="status-text" class="status-msg"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- PAGE 3: HISTORY VIEW LOGS -->
+        <div id="page-history" class="page">
+            <div class="box">
+                <h2>Transaction History Log</h2>
+                <ul id="history-list" class="history-list"></ul>
+            </div>
+        </div>
+
+<script>// 🚨 CONFIGURATION: PASTE YOUR COPIED GOOGLE WEB APP DEPLOYMENT URL HERE:
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4_NKiVFYW2pHcHat8KMVgnrYg3YYllv4NEK8Tkq5HlhSQnhOwfhmgxL-gV72BZI_LIg/exec";
+
+// Mapped directly to local browser memory engines so they stay on reload
+let records = JSON.parse(localStorage.getItem('moneh_sheet_records')) || [];
+let startingBaseBalance = parseFloat(localStorage.getItem('moneh_base_balance')) || 0.00;
+
+// View Nav Handling Logic
+function showPage(pageName) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById(`page-${pageName}`).classList.add('active');
+    document.getElementById(`tab-${pageName}`).classList.add('active');
+}
+
+// Assign and save manual baseline configuration inputs
+function saveManualBase() {
+    const inputVal = parseFloat(document.getElementById('base-balance-input').value);
+    if (!isNaN(inputVal)) {
+        startingBaseBalance = inputVal;
+        localStorage.setItem('moneh_base_balance', startingBaseBalance);
+        updateScreen();
+        alert("Baseline capital saved permanently into system state!");
+        document.getElementById('base-balance-input').value = '';
+    } else {
+        alert("Please enter a valid numeric value.");
+    }
+}
+
+// UI Recalculation Engine
+function updateScreen() {
+    let totalInflow = 0;
+    let totalOutflow = 0;
+    
+    const historyList = document.getElementById('history-list');
+    if (historyList) historyList.innerHTML = '';
+
+    // Run metric accumulations cleanly
+    records.forEach(item => {
+        if (item.type === 'income') {
+            totalInflow += item.amount;
+        } else {
+            totalOutflow += item.amount;
+        }
+
+        // Render lists under separate History tab
+        if (historyList) {
+            const li = document.createElement('li');
+            if (item.type === 'income') {
+                li.innerHTML = `<span class="tx-desc">${item.desc}</span><span class="tx-inc">+$${item.amount.toFixed(2)}</span>`;
+            } else {
+                li.innerHTML = `<span class="tx-desc">${item.desc}</span><span class="tx-spd">-$${item.amount.toFixed(2)}</span>`;
+            }
+            historyList.appendChild(li);
+        }
+    });
+
+    // Live Balance formula: Starting Input Box + Incomes - Spending
+    const liveCalculatedBalance = startingBaseBalance + totalInflow - totalOutflow;
+
+    // Push numbers safely directly to your screen text cards
+    document.getElementById('total-balance').innerText = `$${liveCalculatedBalance.toFixed(2)}`;
+    document.getElementById('total-income').innerText = `$${totalInflow.toFixed(2)}`;
+    document.getElementById('total-spending').innerText = `$${totalOutflow.toFixed(2)}`;
+}
+
+// Form Submission Interceptor
+document.getElementById('money-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const desc = document.getElementById('form-desc').value.trim();
+    const amount = parseFloat(document.getElementById('form-amount').value);
+    const type = document.getElementById('form-type').value;
+    
+    const btn = document.getElementById('btn-submit');
+    const statusText = document.getElementById('status-text');
+    const dataPackage = { desc, amount, type };
+
+    // Change UI instantly to processing state 
+    btn.disabled = true;
+    btn.innerText = "Syncing payload...";
+    statusText.style.display = "block";
+    statusText.style.color = "#666";
+    statusText.innerText = "Transmitting records to Google Sheet cloud...";
+
+    // Append data locally first to protect current totals immediately
+    records.unshift(dataPackage);
+    localStorage.setItem('moneh_sheet_records', JSON.stringify(records));
+    updateScreen();
+
+    try {
+        // Send background fetch out to your deployed script url
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dataPackage)
+        });
+
+        statusText.style.color = "#10B981";
+        statusText.innerText = "✓ Linked successfully to Google Sheets row!";
+        document.getElementById('money-form').reset();
+        
+        // Route user cleanly over to history log view page once finished 
+        setTimeout(() => { 
+            statusText.style.display = "none";
+            showPage('history');
+        }, 1200);
+
+    } catch (error) {
+        console.error(error);
+        statusText.style.color = "#EF4444";
+        statusText.innerText = "⚠️ Locally saved, but Google Sheets connection dropped.";
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Sync to Cloud Sheets";
+    }
+});
+
+// Initialize display configuration state routines upon app load
+updateScreen();
+</script>
